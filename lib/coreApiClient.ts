@@ -1,5 +1,10 @@
+export interface ApiError {
+  status: number;
+  message: string;
+  error: string;
+}
 export interface ApiErrorResponse {
-  errorMessage?: string;
+  error: ApiError;
   response: Response;
 }
 

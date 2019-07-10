@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base",
+  "exclude": [
+    "node_modules",
+    "vendor",
+    "public",
+    "tests",
+    "dist",
+    "build",
+    "output",
+  ],
+}

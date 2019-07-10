@@ -157,7 +157,7 @@ export const createApiFunction = (path: string, method: string, operation: Opera
   const hasBodyParams = bodyParams && Object.keys(bodyParams).length;
   
   // Initiate function construction. Leaading space for class spacing
-  let apiFunction = `export const ${operation.operationId} = (`
+  let apiFunction = `export function ${operation.operationId}(`
 
   // Add comma separated path arguments as their own arguments
   if (Array.isArray(pathParamArguments) && pathParamArguments.length) {
@@ -191,7 +191,7 @@ export const createApiFunction = (path: string, method: string, operation: Opera
   }
   
   // Call base function
-  apiFunction += `) => {
+  apiFunction += `) {
     return makeRequest<${responseType}>(
       "${method.toUpperCase()}", 
       "${path}"${(pathParams || []).map(param => `.replace("{${param.name}}", ${param.name})`)}`

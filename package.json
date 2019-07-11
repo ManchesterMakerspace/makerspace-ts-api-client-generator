@@ -1,6 +1,6 @@
 {
   "name": "makerspace-ts-api-client-generator",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "main": "dist/main.js",
   "author": "Will Lynch <will.lynch91@gmail.com>",
   "license": "MIT",

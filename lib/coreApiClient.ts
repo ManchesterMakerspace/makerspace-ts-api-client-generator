@@ -15,7 +15,7 @@ export interface ApiDataResponse<T> {
 
 const isObject = (item: any): boolean => !!item && typeof item === 'object';
 export const isApiErrorResponse = (response: any): response is ApiErrorResponse => {
-  return isObject(response) && response.errorMessage;
+  return !!(isObject(response) && response.error);
 }
 
 const defaultMessage = "Unknown Error.  Contact an administrator";

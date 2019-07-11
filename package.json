@@ -1,13 +1,14 @@
 {
   "name": "makerspace-ts-api-client-generator",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "dist/main.js",
   "author": "Will Lynch <will.lynch91@gmail.com>",
   "license": "MIT",
   "bin": "./dist/main.js",
   "scripts": {
     "build": "tsc",
-    "run": "node dist/main.js generate"
+    "run": "node dist/main.js generate",
+    "prepublish": "tsc"
   },
   "devDependencies": {
     "@types/node": "^12.0.12",

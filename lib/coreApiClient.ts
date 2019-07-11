@@ -61,13 +61,13 @@ export const makeRequest = <T>(
     }
 
     try {
-      const dataCollection = await result.response.json()
-      if (dataCollection) {
-        result.data = responseRoot ? dataCollection[responseRoot] : dataCollection;
-      }
+      result.data = await result.response.json()
     } catch { }
 
     if (result.response.status >= 200 && result.response.status < 300) {
+      if (responseRoot) {
+        result.data = result.data[responseRoot];
+      }
       return result;
     } else {
       return {

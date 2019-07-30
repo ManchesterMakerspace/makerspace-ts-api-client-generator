@@ -55,7 +55,7 @@ const extractEnumsFromProperties = (properties: Properties, baseName: string): s
     return enums;
   }
 
-  return Object.entries(properties).map(([propertyName, property]) => 
+  return Object.entries(properties).map(([propertyName, property]) =>
     extractEnumFromProperty(property, toTitleCase(baseName) + toTitleCase(propertyName))).filter(e => !!e);
 }
 
@@ -104,7 +104,7 @@ export const createTypeDefinition = (name: string, definition: ObjectProperty): 
   });
 
   typeDef += `}\n`;
-  
+
   const typeEnums = enums.join("\n");
 
   return (typeEnums.length ? typeEnums + "\n" : "") + typeDef;
@@ -131,7 +131,7 @@ export const createApiFunction = (path: string, method: string, operation: Opera
     pathParamArguments = pathParams.map(param =>{
       return `${param.name}: ${extractTypeFromProperty(param)}`;
     });
-      
+
     queryParams = operation.parameters.filter(param => param.in === "query").map(param => ({
       name: param.name,
       required: param.required,
@@ -144,18 +144,22 @@ export const createApiFunction = (path: string, method: string, operation: Opera
     const bParams = operation.parameters.filter(param => param.in === "body");
     bodyParams = bParams.map(param => {
       const { schema } = param;
-      return ({
+      const type =
+        Object.keys(schema.properties).length === 1
+          ? extractTypeFromProperty(schema.properties[extractRoot(schema)])
+          : extractTypeFromProperties(schema);
+      return {
+        type,
         name: param.name,
         required: param.required,
-        root: extractRoot(schema),
-        type: extractTypeFromProperty(schema.properties[extractRoot(schema)]),
-      });
+        root: extractRoot(schema)
+      };
     });
   }
 
   const hasQueryParams = queryParams && Object.keys(queryParams).length;
   const hasBodyParams = bodyParams && Object.keys(bodyParams).length;
-  
+
   // Initiate function construction. Leaading space for class spacing
   let apiFunction = `export function ${operation.operationId}(`
 
@@ -189,13 +193,13 @@ export const createApiFunction = (path: string, method: string, operation: Opera
     responseType = isSchemaProperty(successResponse) ? extractTypeFromProperty(successResponse.schema.properties[extractRoot(successResponse.schema)]) : "void";
     responseRoot = isSchemaProperty(successResponse) ? extractRoot(successResponse.schema) : undefined;
   }
-  
+
   // Call base function
   apiFunction += `) {
     return makeRequest<${responseType}>(
-      "${method.toUpperCase()}", 
+      "${method.toUpperCase()}",
       "${path}"${(pathParams || []).map(param => `.replace("{${param.name}}", ${param.name})`)}`
-      
+
   // Add appropriate params to function
   if (hasQueryParams) {
     apiFunction += `,
@@ -216,7 +220,7 @@ export const createApiFunction = (path: string, method: string, operation: Opera
     }
     apiFunction += `"${responseRoot}"`
   }
-  
+
 
   // Close function
   apiFunction += `

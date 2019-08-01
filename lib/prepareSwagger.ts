@@ -147,7 +147,7 @@ export const createApiFunction = (path: string, method: string, operation: Opera
       const type =
         Object.keys(schema.properties).length === 1
           ? extractTypeFromProperty(schema.properties[extractRoot(schema)])
-          : extractTypeFromProperties(schema);
+          : extractTypeFromProperty(schema as any as Property);
       return {
         type,
         name: param.name,

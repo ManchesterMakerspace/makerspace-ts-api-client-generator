@@ -1,9 +1,10 @@
-#!/usr/bin/env node 
+#!/usr/bin/env node
 
 const fs = require('fs');
 const path = require('path');
 import { createTypeDefinition, createApiFunction, enums } from "./prepareSwagger";
 import { ObjectProperty, PathDefinition } from "./types";
+import { join, isAbsolute } from "path";
 
 const argv = require('yargs')
               .usage('Usage: $0 <command> [options]')
@@ -26,7 +27,7 @@ const getPath = (relative: string): string => path.resolve(__dirname, relative);
 const coreApiClient = fs.readFileSync(getPath("../lib/coreApiClient.ts"));
 
 const swaggerLocation = argv.file;
-const swagger = require(swaggerLocation);
+const swagger = require(isAbsolute(swaggerLocation) ? swaggerLocation : join(process.cwd(), swaggerLocation));
 
 const definitions = Object.entries(swagger.definitions as { [key: string]: ObjectProperty }).map(([name, def]) => createTypeDefinition(name, def));
 const apiFunctions = Object.entries(swagger.paths as PathDefinition).reduce((functions, [path, operations]) => {
@@ -37,10 +38,10 @@ const apiFunctions = Object.entries(swagger.paths as PathDefinition).reduce((fun
 }, []);
 
 const apiClientString = [
-  coreApiClient, 
+  coreApiClient,
   ...swagger.basePath ? [`baseApiPath = "${swagger.basePath}";\n`] : [],
   ...enums,
-  ...definitions, 
+  ...definitions,
   ...apiFunctions,
 ];
 require('fs').writeFileSync(`${argv.o}/apiClient.ts`, apiClientString.join("\n"), 'utf8');

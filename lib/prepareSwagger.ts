@@ -67,7 +67,7 @@ const extractTypeFromProperties = (properties: Properties): TypeCollection => {
   }
 
   Object.entries(properties).reduce((typeDefinition, [propertyName, property]) => {
-    const type = extractTypeFromProperty(property);
+    const type = typeof property === "string" ? extractTypeFromRef(property) : extractTypeFromProperty(property);
     const optional = property["x-nullable"]
 
     const propertyKey = `${propertyName}${optional ? "?" : ""}`;

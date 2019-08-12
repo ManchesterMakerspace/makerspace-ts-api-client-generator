@@ -1,8 +1,17 @@
-import { isRefProperty, isObjectProperty, Properties, isArrayProperty, ObjectProperty, Operation, Parameter, isSchemaProperty, Property, ApiResponse, BasicProperty } from "./types";
-
-interface TypeCollection {
-  [key: string]: string | TypeCollection;
-}
+import {
+  isRefProperty,
+  isObjectProperty,
+  Properties,
+  isArrayProperty,
+  ObjectProperty,
+  Operation,
+  Parameter,
+  isSchemaProperty,
+  Property,
+  ApiResponse,
+  BasicProperty,
+  TypeCollection
+} from "./types";
 
 export const enums: string[] = [];
 
@@ -59,20 +68,21 @@ const extractEnumsFromProperties = (properties: Properties, baseName: string): s
     extractEnumFromProperty(property, toTitleCase(baseName) + toTitleCase(propertyName))).filter(e => !!e);
 }
 
-const extractTypeFromProperties = (properties: Properties): TypeCollection => {
+const extractTypeFromProperties = (properties: Properties): TypeCollection | string => {
   const typeDefinition: TypeCollection = {};
 
   if (!properties) {
     return typeDefinition;
   }
 
+  if (Object.keys(properties).length === 1 && Object.keys(properties)[0] === "$ref") {
+    return extractTypeFromRef(String(Object.values(properties)[0]));
+  }
+
   Object.entries(properties).reduce((typeDefinition, [propertyName, property]) => {
-    const type = typeof property === "string" ? extractTypeFromRef(property) : extractTypeFromProperty(property);
-    const optional = property["x-nullable"]
+    const propertyKey = `${propertyName}${property["x-nullable"] ? "?" : ""}`;
 
-    const propertyKey = `${propertyName}${optional ? "?" : ""}`;
-
-    typeDefinition[propertyKey] = type;
+    typeDefinition[propertyKey] = extractTypeFromProperty(property);
     return typeDefinition;
   }, typeDefinition);
 

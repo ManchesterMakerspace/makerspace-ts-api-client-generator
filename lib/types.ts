@@ -35,6 +35,10 @@ export interface SchemaProperty extends BaseProperty {
 }
 export const isSchemaProperty = (item: any): item is SchemaProperty => item.hasOwnProperty("schema");
 
+export interface TypeCollection {
+  [key: string]: string | TypeCollection;
+}
+export const isTypeCollection = (item: any): item is TypeCollection => typeof item === "object";
 
 export interface PathDefinition {
   [key: string]: {

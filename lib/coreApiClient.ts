@@ -24,14 +24,27 @@ let baseApiPath: string = "";
 export const setBaseApiPath = (path: string) => baseApiPath = path;
 
 const buildUrl = (path: string): string => `${baseUrl}${baseApiPath}${path}`;
-const parseQueryParams = (params: { [key: string]: any }) => 
+const parseQueryParams = (params: { [key: string]: any }) =>
   Object.keys(params)
-    .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
+    .map(k => {
+
+      let key = encodeURIComponent(k);
+      const value = params[k];
+      if (Array.isArray(value)) {
+        key += "[]";
+        return value.map(v => constructQueryParam(key, v)).join("&");
+      }
+
+      return constructQueryParam(key, value);
+    })
     .join('&');
 
+const constructQueryParam = (key: string, value: string): string =>
+  `${key}=${encodeURIComponent(value)}`;
+
 export const makeRequest = <T>(
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", 
-  path: string, 
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+  path: string,
   params?: { [key: string]: any },
   responseRoot?: string,
 ): Promise<ApiDataResponse<T> | ApiErrorResponse> => {

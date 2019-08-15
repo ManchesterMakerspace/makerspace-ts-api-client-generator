@@ -26,6 +26,7 @@ export const setBaseApiPath = (path: string) => baseApiPath = path;
 const buildUrl = (path: string): string => `${baseUrl}${baseApiPath}${path}`;
 const parseQueryParams = (params: { [key: string]: any }) =>
   Object.keys(params)
+    .filter(k => params[k] !== undefined)
     .map(k => {
 
       let key = encodeURIComponent(k);

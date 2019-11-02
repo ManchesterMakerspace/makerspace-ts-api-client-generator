@@ -120,27 +120,22 @@ export const createTypeDefinition = (name: string, definition: ObjectProperty): 
   return (typeEnums.length ? typeEnums + "\n" : "") + typeDef;
 };
 
+type Param = { name: string; required: boolean; type: TypeCollection | string; };
+type BodyParam = (Param & {
+  root: string;
+});
 export const createApiFunction = (path: string, method: string, operation: Operation): string => {
 
-  let pathParams: Parameter[];
-  let pathParamArguments: any;
-  let queryParams: {
-    name: string;
-    required: boolean;
-    type: TypeCollection | string;
-  }[];
-  let bodyParams: {
-    name: string;
-    root: string;
-    required: boolean;
-    type: TypeCollection | string;
-  }[];
+  let pathParams: Param[] = [];
+  let queryParams: Param[] = [];
+  let bodyParams: BodyParam[] = [];
 
   if (operation.parameters) {
-    pathParams = operation.parameters.filter(param => param.in === "path");
-    pathParamArguments = pathParams.map(param =>{
-      return `${param.name}: ${extractTypeFromProperty(param)}`;
-    });
+    pathParams = operation.parameters.filter(param => param.in === "path").map(param => ({
+      name: param.name,
+      required: true,
+      type: extractTypeFromProperty(param),
+    }));
 
     queryParams = operation.parameters.filter(param => param.in === "query").map(param => ({
       name: param.name,
@@ -167,32 +162,29 @@ export const createApiFunction = (path: string, method: string, operation: Opera
     });
   }
 
+  const allParams = [...pathParams, ...bodyParams, ...queryParams];
   const hasQueryParams = queryParams && Object.keys(queryParams).length;
   const hasBodyParams = bodyParams && Object.keys(bodyParams).length;
 
   // Initiate function construction. Leaading space for class spacing
   let apiFunction = `export function ${operation.operationId}(`
 
-  // Add comma separated path arguments as their own arguments
-  if (Array.isArray(pathParamArguments) && pathParamArguments.length) {
-    apiFunction += pathParamArguments.join(", ");
-    if (hasQueryParams || hasBodyParams) { apiFunction += ", " } // Add a comman and space since theres more here
-  }
-
   // Group params as one argument
-  // Can only have query or body params, not both
-  if (hasQueryParams) {
-    const paramsRequired = queryParams.some(qp => qp.required);
-    apiFunction += `params${!paramsRequired ? "?" : ""}: { \n`;
-    queryParams.forEach(qp => {
-      apiFunction += `    ${qp.name}${!qp.required ? "?" : ""}: ${qp.type},\n`;
-    })
-    apiFunction += `}`
-  } else if (hasBodyParams) {
-    bodyParams.forEach((bodyParam) => {
-      apiFunction += `${bodyParam.name}${!bodyParam.required ? "?" : ""}: ${bodyParam.type},\n`;
-    })
-  }
+  const paramsRequired = allParams.some(param => param.required);
+  apiFunction += `params${!paramsRequired ? "?" : ""}: { \n`;
+
+  // Add comma separated path arguments as their own arguments
+  // if (Array.isArray(pathParamArguments) && pathParamArguments.length) {
+  //   apiFunction += pathParamArguments.join(", ");
+  //   if (hasQueryParams || hasBodyParams) { apiFunction += ", " } // Add a comman and space since theres more here
+  // }
+
+  
+  const renderParam = (param: Param) => `${param.name}${!param.required ? "?" : ""}: ${param.type}`;
+  allParams.forEach((param) => {
+    apiFunction += `  ${renderParam(param)},\n`;
+  })
+  apiFunction += `}) {\n`
 
   const [statusCode, successResponse]: [string, ApiResponse] = Object.entries(operation.responses).find(([statusCode]) => statusCode < "300" && statusCode >= "200");
   let responseType: string;
@@ -205,19 +197,21 @@ export const createApiFunction = (path: string, method: string, operation: Opera
   }
 
   // Call base function
-  apiFunction += `) {
-    return makeRequest<${responseType}>(
-      "${method.toUpperCase()}",
-      "${path}"${(pathParams || []).map(param => `.replace("{${param.name}}", ${param.name})`)}`
+  apiFunction += `  return makeRequest<${responseType}>(
+    "${method.toUpperCase()}",
+    "${path}"${(pathParams || []).map(param => `.replace("{${param.name}}", params.${param.name})`)}`
 
   // Add appropriate params to function
+    // if (hasQueryParams || hasBodyParams) {
+    //   apiFunction += `, \n  params`;
+    // }
   if (hasQueryParams) {
     apiFunction += `,
     params`
   } else if (hasBodyParams) {
     bodyParams.forEach(bodyParam => {
       apiFunction += `,
-    { ${bodyParam.root}: ${bodyParam.name} }`
+    { ${bodyParam.root}: params.${bodyParam.name} }`
     });
   }
 

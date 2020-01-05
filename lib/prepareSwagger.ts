@@ -16,10 +16,10 @@ import {
 export const enums: string[] = [];
 
 
-const toCamelCase = (str: string): string => str.replace(/(\-\w)/g, matches => matches[1].toUpperCase());
+const toCamelCase = (str: string): string => str.replace(/((\-|\W|\_)\w)/g, matches => matches[1].toUpperCase());
 const toTitleCase = (str: string): string => {
   const camelCase = toCamelCase(str);
-  return str.charAt(0).toUpperCase() + str.substring(1);
+  return camelCase.charAt(0).toUpperCase() + camelCase.substring(1);
 }
 
 const extractRoot = (schema: Properties) => Object.keys(schema.properties).shift();

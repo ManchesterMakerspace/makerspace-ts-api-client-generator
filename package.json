@@ -1,13 +1,13 @@
 {
   "name": "makerspace-ts-api-client-generator",
-  "version": "1.0.1",
-  "main": "dist/main.js",
+  "version": "2.0.0",
+  "main": "lib/main.ts",
   "author": "Will Lynch <will.lynch91@gmail.com>",
   "license": "MIT",
-  "bin": "./dist/main.js",
+  "bin": "./lib/main.ts",
   "scripts": {
-    "build": "tsc",
-    "generate": "node dist/main.js generate",
+    "build": "ts-node ./lib/build.ts",
+    "generate": "ts-node ./lib/main.ts",
     "prepublish": "yarn build"
   },
   "dependencies": {
@@ -15,7 +15,10 @@
   },
   "devDependencies": {
     "@types/node": "^12.0.12",
+    "@types/yargs": "^15.0.12",
+    "mvn-artifact-download": "^5.1.0",
     "swagger-ts-client": "^0.9.6",
+    "ts-node": "^9.1.1",
     "typescript": "^3.5.2"
   }
 }

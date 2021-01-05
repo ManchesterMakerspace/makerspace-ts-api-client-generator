@@ -10,7 +10,8 @@ export interface ApiErrorResponse {
 
 export interface ApiDataResponse<T> {
   response: Response;
-  data: T
+  data: T;
+  error?: ApiError;
 }
 
 const isObject = (item: any): boolean => !!item && typeof item === 'object';
@@ -48,7 +49,7 @@ export const makeRequest = <T>(
   path: string,
   params?: { [key: string]: any },
   responseRoot?: string,
-): Promise<ApiDataResponse<T> | ApiErrorResponse> => {
+): Promise<ApiDataResponse<T>> => {
   let body: string;
   let url: string = buildUrl(path);
   if (params) {
@@ -86,12 +87,13 @@ export const makeRequest = <T>(
     } else {
       return {
         response: result.response,
-        error: result.data || {
+        data: undefined,
+        error: (result.data as unknown as ApiError)|| {
           status: 500,
           message: defaultMessage,
           error: "internal_server_error"
-        },
-      } as ApiErrorResponse;
+        }
+      };
     }
   });
 };
@@ -109,3 +111,15 @@ const getCookie = (name: string): string => {
   }
   return decodeURIComponent(xsrfCookies[0].split('=')[1]);
 };
+
+function validateRequiredParameters(
+  required: string[],
+  operationName: string,
+  params: { [key: string]: any }
+) {
+  required.forEach(requiredParameter => {
+    if (params[requiredParameter] === null) {
+      throw new Error(`Missing required parameter ${requiredParameter} when calling ${operationName}`);
+    }
+  });
+}

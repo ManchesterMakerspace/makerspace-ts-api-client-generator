@@ -13,7 +13,7 @@ export interface {{classname}} {{#parent}}extends {{{parent}}} {{/parent}}{
 {{#isEnum}}
 export type {{{classname}}} = {{#allowableValues}}{{#values}}"{{{.}}}"{{^-last}} | {{/-last}}{{/values}}{{/allowableValues}};
 export enum {{{classname}}}Values {
-    {{#allowableValues}}{{#values}}{{#titlecase}}{{.}}{{/titlecase}} = "{{{.}}}"{{^-last}},
+    {{#allowableValues}}{{#values}}{{.}} = "{{{.}}}"{{^-last}},
     {{/-last}}{{/values}}{{/allowableValues}}
 }
 {{/isEnum}}
@@ -52,65 +52,57 @@ export enum {{classname}}{{enumName}} {
 export type {{nickname}}ReturnType = {{#returnType}}{{{returnType}}}[keyof {{{returnType}}}]{{/returnType}}{{^returnType}}Response{{/returnType}};
 {{/operation}}
 
-/**
- * {{classname}} - object-oriented interface{{#description}}
- * {{&description}}{{/description}}
- */
-export class {{classname}} {
-
 {{#operation}}
-    /** {{#summary}}
-     * {{summary}}{{/summary}}{{#notes}}
-     * {{notes}}{{/notes}}{{#allParams}}
-     * @param {{paramName}} {{description}}{{/allParams}}
-     */
-    public {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{nickname}}ReturnType{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
-        {{#hasParams}}
-        validateRequiredParameters(
-            [{{#allParams}}{{#required}}"{{paramName}}"{{^-last}},{{/-last}}{{/required}}{{/allParams}}], 
-            "{{nickname}}", 
-            params
-        );
-        {{/hasParams}}
+/** {{#summary}}
+* {{summary}}{{/summary}}{{#notes}}
+* {{notes}}{{/notes}}{{#allParams}}
+* @param {{paramName}} {{description}}{{/allParams}}
+*/
+export function {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{nickname}}ReturnType{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
+    {{#hasParams}}
+    validateRequiredParameters(
+        [{{#allParams}}{{#required}}"{{paramName}}"{{^-last}},{{/-last}}{{/required}}{{/allParams}}], 
+        "{{nickname}}", 
+        params
+    );
+    {{/hasParams}}
 
-        const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
+    const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
 
-        return makeRequest{{#returnType}}{{^isResponseBinary}}<{{nickname}}ReturnType>{{/isResponseBinary}}{{/returnType}}(
-            "{{httpMethod}}",
-            path,
+    return makeRequest{{#returnType}}{{^isResponseBinary}}<{{nickname}}ReturnType>{{/isResponseBinary}}{{/returnType}}(
+        "{{httpMethod}}",
+        path,
 {{#hasQueryParams}}
-            {
-                {{#queryParams}}
-                "{{baseName}}": { values: params["{{paramName}}"]{{#collectionFormat}}, collectionFormat: "{{collectionFormat}}"{{/collectionFormat}} }{{^-last}},{{/-last}}
-                {{/queryParams}}
-            },
+        {
+            {{#queryParams}}
+            "{{baseName}}": { values: params["{{paramName}}"]{{#collectionFormat}}, collectionFormat: "{{collectionFormat}}"{{/collectionFormat}} }{{^-last}},{{/-last}}
+            {{/queryParams}}
+        },
 {{/hasQueryParams}}
 {{#hasHeaderParams}}
-            {
-                {{#headerParams}}
-                "{{baseName}}":  params["{{paramName}}"]{{^-last}},{{/-last}}
-                {{/headerParams}}
-            },
-            {{/hasHeaderParams}}
+        {
+            {{#headerParams}}
+            "{{baseName}}":  params["{{paramName}}"]{{^-last}},{{/-last}}
+            {{/headerParams}}
+        },
+        {{/hasHeaderParams}}
 {{#hasFormParams}}
-            {
-                {{#formParams}}
-                "{{baseName}}": params["{{paramName}}"]{{^-last}},{{/-last}}
-                {{/formParams}}
-            }
-            {{/hasFormParams}}
+        {
+            {{#formParams}}
+            "{{baseName}}": params["{{paramName}}"]{{^-last}},{{/-last}}
+            {{/formParams}}
+        }
+        {{/hasFormParams}}
 {{^hasFormParams}}
 {{#hasBodyParam}}
 {{#bodyParam}}
-            params["{{paramName}}"]
-            {{/bodyParam}}
-        {{/hasBodyParam}}
-    {{/hasFormParams}}
-        );
-    }
+        params["{{paramName}}"]
+        {{/bodyParam}}
+    {{/hasBodyParam}}
+{{/hasFormParams}}
+    );
+}
 {{/operation}}
-};
-
 {{/operations}}
 {{/apis}}
 {{/apiInfo}}

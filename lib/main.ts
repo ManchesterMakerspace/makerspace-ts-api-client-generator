@@ -43,8 +43,9 @@ export const main = () => {
   const binPath = getPath(`../bin/${SWAGGER_JAR_NAME}`);
   const templatePath = getPath("../templates");
   const tmpPath = getPath("../tmp");
+  const configPath = getPath("../config/config.json");
   const outputPath = Path.resolve(process.cwd(), `${argv.o}/apiClient.ts`)
-  let command = `java -jar "${binPath}" generate -l typescript-fetch -t "${templatePath}" -o ${tmpPath}`;
+  let command = `java -jar "${binPath}" generate --template-engine mustache -l typescript-fetch -t "${templatePath}" -c "${configPath}" -o ${tmpPath}`;
 
   let swaggerLocation: string = String(argv.file);
   if (!isAbsolute(swaggerLocation)) {

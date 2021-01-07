@@ -58,9 +58,8 @@ export type {{nickname}}ReturnType = {{#returnType}}{{{returnType}}}[keyof {{{re
 * {{notes}}{{/notes}}{{#allParams}}
 * @param {{paramName}} {{description}}{{/allParams}}
 */
-export function {{nickname}}({{#hasParams}}{{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{{dataType}}}{{^-last}}, {{/-last}}{{/allParams}}{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{nickname}}ReturnType{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
-
-    const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ {{paramName}} }`){{/pathParams}};
+export function {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{nickname}}ReturnType{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
+    const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
 
     return makeRequest{{#returnType}}{{^isResponseBinary}}<{{nickname}}ReturnType>{{/isResponseBinary}}{{/returnType}}(
         "{{httpMethod}}",
@@ -68,28 +67,28 @@ export function {{nickname}}({{#hasParams}}{{#allParams}}{{paramName}}{{^require
 {{#hasQueryParams}}
         {
             {{#queryParams}}
-            "{{baseName}}": { values: {{paramName}}{{#collectionFormat}}, collectionFormat: "{{collectionFormat}}"{{/collectionFormat}} }{{^-last}},{{/-last}}
+            "{{baseName}}": { values: params["{{paramName}}"]{{#collectionFormat}}, collectionFormat: "{{collectionFormat}}"{{/collectionFormat}} }{{^-last}},{{/-last}}
             {{/queryParams}}
         },
 {{/hasQueryParams}}
 {{#hasHeaderParams}}
         {
             {{#headerParams}}
-            "{{baseName}}":  {{paramName}}{{^-last}},{{/-last}}
+            "{{baseName}}":  params["{{paramName}}"]{{^-last}},{{/-last}}
             {{/headerParams}}
         },
         {{/hasHeaderParams}}
 {{#hasFormParams}}
         {
             {{#formParams}}
-            "{{baseName}}": {{paramName}}{{^-last}},{{/-last}}
+            "{{baseName}}": params["{{paramName}}"]{{^-last}},{{/-last}}
             {{/formParams}}
         }
         {{/hasFormParams}}
 {{^hasFormParams}}
 {{#hasBodyParam}}
 {{#bodyParam}}
-        {{paramName}}
+        params["{{paramName}}"]
         {{/bodyParam}}
     {{/hasBodyParam}}
 {{/hasFormParams}}

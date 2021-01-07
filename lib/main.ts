@@ -45,7 +45,7 @@ export const main = () => {
   const tmpPath = getPath("../tmp");
   const configPath = getPath("../config/config.json");
   const outputPath = Path.resolve(process.cwd(), `${argv.o}/apiClient.ts`)
-  let command = `java -jar "${binPath}" generate --template-engine mustache -l typescript-fetch -t "${templatePath}" -c "${configPath}" -o ${tmpPath}`;
+  let command = `java -DdebugOperations -jar "${binPath}" generate --template-engine mustache -l typescript-fetch -t "${templatePath}" -c "${configPath}" -o ${tmpPath}`;
 
   let swaggerLocation: string = String(argv.file);
   if (!isAbsolute(swaggerLocation)) {

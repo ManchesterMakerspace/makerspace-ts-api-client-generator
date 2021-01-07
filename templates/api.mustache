@@ -58,16 +58,9 @@ export type {{nickname}}ReturnType = {{#returnType}}{{{returnType}}}[keyof {{{re
 * {{notes}}{{/notes}}{{#allParams}}
 * @param {{paramName}} {{description}}{{/allParams}}
 */
-export function {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{nickname}}ReturnType{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
-    {{#hasParams}}
-    validateRequiredParameters(
-        [{{#allParams}}{{#required}}"{{paramName}}"{{^-last}},{{/-last}}{{/required}}{{/allParams}}], 
-        "{{nickname}}", 
-        params
-    );
-    {{/hasParams}}
+export function {{nickname}}({{#hasParams}}{{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{{dataType}}}{{^-last}}, {{/-last}}{{/allParams}}{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{nickname}}ReturnType{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
 
-    const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
+    const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ {{paramName}} }`){{/pathParams}};
 
     return makeRequest{{#returnType}}{{^isResponseBinary}}<{{nickname}}ReturnType>{{/isResponseBinary}}{{/returnType}}(
         "{{httpMethod}}",
@@ -75,28 +68,28 @@ export function {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName
 {{#hasQueryParams}}
         {
             {{#queryParams}}
-            "{{baseName}}": { values: params["{{paramName}}"]{{#collectionFormat}}, collectionFormat: "{{collectionFormat}}"{{/collectionFormat}} }{{^-last}},{{/-last}}
+            "{{baseName}}": { values: {{paramName}}{{#collectionFormat}}, collectionFormat: "{{collectionFormat}}"{{/collectionFormat}} }{{^-last}},{{/-last}}
             {{/queryParams}}
         },
 {{/hasQueryParams}}
 {{#hasHeaderParams}}
         {
             {{#headerParams}}
-            "{{baseName}}":  params["{{paramName}}"]{{^-last}},{{/-last}}
+            "{{baseName}}":  {{paramName}}{{^-last}},{{/-last}}
             {{/headerParams}}
         },
         {{/hasHeaderParams}}
 {{#hasFormParams}}
         {
             {{#formParams}}
-            "{{baseName}}": params["{{paramName}}"]{{^-last}},{{/-last}}
+            "{{baseName}}": {{paramName}}{{^-last}},{{/-last}}
             {{/formParams}}
         }
         {{/hasFormParams}}
 {{^hasFormParams}}
 {{#hasBodyParam}}
 {{#bodyParam}}
-        params["{{paramName}}"]
+        {{paramName}}
         {{/bodyParam}}
     {{/hasBodyParam}}
 {{/hasFormParams}}

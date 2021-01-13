@@ -11,10 +11,9 @@
 export interface {{classname}} {{#parent}}extends {{{parent}}} {{/parent}}{
 {{/isEnum}}
 {{#isEnum}}
-export type {{{classname}}} = {{#allowableValues}}{{#values}}"{{{.}}}"{{^-last}} | {{/-last}}{{/values}}{{/allowableValues}};
-export enum {{{classname}}}Values {
-    {{#allowableValues}}{{#values}}{{.}} = "{{{.}}}"{{^-last}},
-    {{/-last}}{{/values}}{{/allowableValues}}
+export enum {{{classname}}} {
+    {{#allowableValues}}{{#enumVars}}{{name}} = {{{value}}}{{^-last}},
+    {{/-last}}{{/enumVars}}{{/allowableValues}}
 }
 {{/isEnum}}
 {{#vars}}
@@ -48,9 +47,6 @@ export enum {{classname}}{{enumName}} {
 {{#apiInfo}}
 {{#apis}}
 {{#operations}}
-{{#operation}}
-export type {{nickname}}ReturnType = {{#returnType}}{{{returnType}}}[keyof {{{returnType}}}]{{/returnType}}{{^returnType}}Response{{/returnType}};
-{{/operation}}
 
 {{#operation}}
 /** {{#summary}}
@@ -58,10 +54,10 @@ export type {{nickname}}ReturnType = {{#returnType}}{{{returnType}}}[keyof {{{re
 * {{notes}}{{/notes}}{{#allParams}}
 * @param {{paramName}} {{description}}{{/allParams}}
 */
-export function {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{nickname}}ReturnType{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
+export function {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} }{{/hasParams}}): Promise<{ response: Response, data: {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}undefined{{/returnType}} }> {
     const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
 
-    return makeRequest{{#returnType}}{{^isResponseBinary}}<{{nickname}}ReturnType>{{/isResponseBinary}}{{/returnType}}(
+    return makeRequest{{#returnType}}{{^isResponseBinary}}<{{{returnType}}}>{{/isResponseBinary}}{{/returnType}}(
         "{{httpMethod}}",
         path,
 {{#hasQueryParams}}

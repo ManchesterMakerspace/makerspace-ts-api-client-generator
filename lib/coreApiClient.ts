@@ -21,7 +21,7 @@ export const isApiErrorResponse = (response: any): response is ApiErrorResponse 
 
 const defaultMessage = "Unknown Error.  Contact an administrator";
 let baseUrl: string = process.env.BASE_URL || "";
-let baseApiPath: string = "";
+let baseApiPath: string = "/api";
 export const setBaseApiPath = (path: string) => baseApiPath = path;
 
 const buildUrl = (path: string): string => `${baseUrl}${baseApiPath}${path}`;
@@ -48,7 +48,6 @@ export const makeRequest = <T>(
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   params?: { [key: string]: any },
-  responseRoot?: string,
 ): Promise<ApiDataResponse<T>> => {
   let body: string;
   let url: string = buildUrl(path);
@@ -80,9 +79,6 @@ export const makeRequest = <T>(
     } catch { }
 
     if (result.response.status >= 200 && result.response.status < 300) {
-      if (responseRoot) {
-        result.data = result.data[responseRoot];
-      }
       return result;
     } else {
       return {

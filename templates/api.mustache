@@ -63,21 +63,21 @@ export function {{nickname}}({{#hasParams}}params: { {{#allParams}} "{{paramName
 {{#hasQueryParams}}
         {
             {{#queryParams}}
-            "{{baseName}}": { values: params["{{paramName}}"]{{#collectionFormat}}, collectionFormat: "{{collectionFormat}}"{{/collectionFormat}} }{{^-last}},{{/-last}}
+            ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
             {{/queryParams}}
         },
 {{/hasQueryParams}}
 {{#hasHeaderParams}}
         {
             {{#headerParams}}
-            "{{baseName}}":  params["{{paramName}}"]{{^-last}},{{/-last}}
+            ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
             {{/headerParams}}
         },
         {{/hasHeaderParams}}
 {{#hasFormParams}}
         {
             {{#formParams}}
-            "{{baseName}}": params["{{paramName}}"]{{^-last}},{{/-last}}
+            ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
             {{/formParams}}
         }
         {{/hasFormParams}}

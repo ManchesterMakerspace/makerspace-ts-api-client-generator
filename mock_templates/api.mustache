@@ -57,7 +57,7 @@ export class MockMakerspaceApi extends Mockserver {
     */{{#responses}}
     public {{nickname}}_{{code}}({{#hasParams}}
         params: { {{#allParams}}"{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} },{{/hasParams}}{{#returnType}}
-        mockResponse: MockedResponse<{{{returnType}}}>,{{/returnType}}
+        mockResponse: {{{returnType}}},{{/returnType}}
         repeat: { times?: number, unlimited?: boolean } = {},
         onMockResolve?: (resolvedMock: MockedRequest<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}never{{/returnType}}>) => void,
         overloadCriteria?: Partial<MatchCriteria>, 

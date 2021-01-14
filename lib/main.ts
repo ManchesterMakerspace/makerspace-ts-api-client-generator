@@ -35,31 +35,57 @@ export const main = () => {
     .nargs('o', 1)
     .describe('o', 'Folder to write client')
     .demandOption(['o'])
+    .alias('m', 'mock')
+    .nargs('m', 1)
+    .describe('m', 'Generate a mockserver')
     .help('h')
     .alias('h', 'help')
     .epilog('copyright 2019')
     .argv;
 
   const binPath = getPath(`../bin/${SWAGGER_JAR_NAME}`);
-  const templatePath = getPath("../templates");
+  const isMockMode = !!argv.m;
+
   const tmpPath = getPath("../tmp");
   const configPath = getPath("../config/config.json");
-  const outputPath = Path.resolve(process.cwd(), `${argv.o}/apiClient.ts`)
-  let command = `java -jar "${binPath}" generate --template-engine mustache -l typescript-fetch -t "${templatePath}" -c "${configPath}" -o ${tmpPath}`;
 
-  let swaggerLocation: string = String(argv.file);
-  if (!isAbsolute(swaggerLocation)) {
-    swaggerLocation = join(process.cwd(), swaggerLocation);
+  function buildCommand(asMock: boolean = false): string {
+    const apiTemplatePath = getPath("../templates");
+    const mockTemplatePath = getPath("../mock_templates");
+    const templatePath = asMock ? mockTemplatePath : apiTemplatePath;
+
+    let command = `java -jar "${binPath}" generate --template-engine mustache -l typescript-fetch -t "${templatePath}" -c "${configPath}" -o ${tmpPath}`;
+
+    let swaggerLocation: string = String(argv.file);
+    if (!isAbsolute(swaggerLocation)) {
+      swaggerLocation = join(process.cwd(), swaggerLocation);
+    }
+    command += ` -i ${swaggerLocation}`;
+
+    return command;
   }
-  command += ` -i ${swaggerLocation}`;
 
-  console.log("Running command", command);
-  execSync(command, { stdio: "inherit" });
+  // Build core API
+  const apiCommand = buildCommand();
+  console.log("Running command", apiCommand);
+  execSync(apiCommand, { stdio: "inherit" });
 
+  // Copy core API and clear out tmp folder
   const apiClientString = fs.readFileSync(`${tmpPath}/api.ts`);
   const coreApiClient = fs.readFileSync(getPath("./coreApiClient.ts"));
-  fs.writeFileSync(outputPath,  [coreApiClient, apiClientString].join("\n"), 'utf8');
+  fs.writeFileSync(Path.resolve(process.cwd(), `${argv.o}/apiClient.ts`),  [coreApiClient, apiClientString].join("\n"), 'utf8');
   deleteFolderRecursive(tmpPath);
+
+  if (isMockMode) {
+    // Build Mock API
+    const apiCommand = buildCommand(true);
+    console.log("Running command", apiCommand);
+    execSync(apiCommand, { stdio: "inherit" });
+
+    // Copy Mock API and clear out tmp folder
+    fs.writeFileSync(Path.resolve(process.cwd(), `${argv.o}/mockApiClient.ts`),  fs.readFileSync(`${tmpPath}/api.ts`), 'utf8');
+    deleteFolderRecursive(tmpPath);
+  }
 }
 
 main();

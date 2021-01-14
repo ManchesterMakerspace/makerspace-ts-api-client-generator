@@ -1,0 +1,114 @@
+/* tslint:disable */
+import { Mockserver, MockedResponse, MockedRequest, MatchCriteria, MockHandler } from "./mockserver";
+
+{{#models}}
+{{#model}}
+{{#description}}
+/**
+ * {{{description}}}
+ */
+{{/description}}
+{{^isEnum}}
+export interface {{classname}} {{#parent}}extends {{{parent}}} {{/parent}}{
+{{/isEnum}}
+{{#isEnum}}
+export enum {{{classname}}} {
+    {{#allowableValues}}{{#enumVars}}{{name}} = {{{value}}}{{^-last}},
+    {{/-last}}{{/enumVars}}{{/allowableValues}}
+}
+{{/isEnum}}
+{{#vars}}
+{{#description}}
+    /**
+     * {{{description}}}
+     */
+{{/description}}
+    "{{name}}"{{^required}}?{{/required}}: {{#isEnum}}{{classname}}{{{enumName}}}{{/isEnum}}{{^isEnum}}{{{datatype}}}{{/isEnum}};
+{{/vars}}
+{{^isEnum}}
+}
+
+{{/isEnum}}{{#hasEnums}}
+{{#vars}}
+    {{#isEnum}}
+export enum {{classname}}{{enumName}} {
+{{#allowableValues}}
+    {{#enumVars}}
+    {{{name}}} = {{{value}}}{{^-last}},{{/-last}}
+    {{/enumVars}}
+{{/allowableValues}}
+}
+
+{{/isEnum}}
+{{/vars}}
+{{/hasEnums}}
+{{/model}}
+{{/models}}
+
+export class MockMakerspaceApi extends Mockserver {
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+    {{#operation}}
+    /** {{#summary}}
+    * Creates a mock that {{summary}}{{/summary}}{{#notes}}
+    * {{notes}}{{/notes}}{{#allParams}}
+    * @param {{paramName}} {{description}}{{/allParams}}
+    */{{#responses}}
+    public {{nickname}}_{{code}}({{#hasParams}}
+        params: { {{#allParams}}"{{paramName}}"{{^required}}?{{/required}}: {{{dataType}}};{{/allParams}} },{{/hasParams}}{{#returnType}}
+        mockResponse: MockedResponse<{{{returnType}}}>,{{/returnType}}
+        repeat: { times?: number, unlimited?: boolean } = {},
+        onMockResolve?: (resolvedMock: MockedRequest<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}never{{/returnType}}>) => void,
+        overloadCriteria?: Partial<MatchCriteria>, 
+    ): MockHandler<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}never{{/returnType}}> {
+        const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
+
+        return this.mockRequest{{#returnType}}{{^isResponseBinary}}<{{{returnType}}}>{{/isResponseBinary}}{{/returnType}}(
+            {
+                path,
+                method: "{{httpMethod}}",
+                
+                response: {{#returnType}}mockResponse{{/returnType}}{{^returnType}}undefined{{/returnType}},
+                times: repeat.times,
+                unlimited: repeat.unlimited,
+                {{#hasQueryParams}}
+                params: {
+                    {{#queryParams}}
+                    ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
+                    {{/queryParams}}
+                },
+        {{/hasQueryParams}}
+        {{#hasHeaderParams}}
+                params: {
+                    {{#headerParams}}
+                    ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
+                    {{/headerParams}}
+                },
+                {{/hasHeaderParams}}
+        {{#hasFormParams}}
+                params: {
+                    {{#formParams}}
+                    ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
+                    {{/formParams}}
+                },
+                {{/hasFormParams}}
+        {{^hasFormParams}}
+        {{#hasBodyParam}}
+        {{#bodyParam}}
+                body: params["{{paramName}}"],
+                {{/bodyParam}}
+            {{/hasBodyParam}}
+        {{/hasFormParams}}
+            },
+            onMockResolve,
+            overloadCriteria
+        );
+    }
+    {{/responses}}
+    {{/operation}}
+
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
+}

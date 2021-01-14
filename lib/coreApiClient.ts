@@ -107,15 +107,3 @@ const getCookie = (name: string): string => {
   }
   return decodeURIComponent(xsrfCookies[0].split('=')[1]);
 };
-
-function validateRequiredParameters(
-  required: string[],
-  operationName: string,
-  params: { [key: string]: any }
-) {
-  required.forEach(requiredParameter => {
-    if (params[requiredParameter] === null) {
-      throw new Error(`Missing required parameter ${requiredParameter} when calling ${operationName}`);
-    }
-  });
-}

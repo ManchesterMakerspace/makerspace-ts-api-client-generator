@@ -66,43 +66,49 @@ export class MockMakerspaceApi extends Mockserver {
 
         return this.mockRequest{{#returnType}}{{^isResponseBinary}}<{{{returnType}}}>{{/isResponseBinary}}{{/returnType}}(
             {
-                path,
-                method: "{{httpMethod}}",
-                
-                response: {{#returnType}}mockResponse{{/returnType}}{{^returnType}}undefined{{/returnType}},
-                times: repeat.times,
-                unlimited: repeat.unlimited,
-                {{#hasQueryParams}}
-                params: {
-                    {{#queryParams}}
-                    ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
-                    {{/queryParams}}
-                },
-        {{/hasQueryParams}}
-        {{#hasHeaderParams}}
-                params: {
-                    {{#headerParams}}
-                    ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
-                    {{/headerParams}}
-                },
-                {{/hasHeaderParams}}
-        {{#hasFormParams}}
-                params: {
-                    {{#formParams}}
-                    ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
-                    {{/formParams}}
-                },
-                {{/hasFormParams}}
-        {{^hasFormParams}}
-        {{#hasBodyParam}}
-        {{#bodyParam}}
-                body: params["{{paramName}}"],
-                {{/bodyParam}}
-            {{/hasBodyParam}}
-        {{/hasFormParams}}
+            path,
+            method: "{{httpMethod}}",
+            response: {
+                data: {{#returnType}}mockResponse{{/returnType}}{{^returnType}}undefined{{/returnType}},
+                response: {
+                    status: {{code}},
+                    statusText: "{{message}}",
+                    ok: {{code}} >= 200 && {{code}} < 300
+                }
             },
-            onMockResolve,
-            overloadCriteria
+            times: repeat.times,
+            unlimited: repeat.unlimited,
+            {{#hasQueryParams}}
+            params: {
+                {{#queryParams}}
+                ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
+                {{/queryParams}}
+            },
+    {{/hasQueryParams}}
+    {{#hasHeaderParams}}
+            params: {
+                {{#headerParams}}
+                ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
+                {{/headerParams}}
+            },
+            {{/hasHeaderParams}}
+    {{#hasFormParams}}
+            params: {
+                {{#formParams}}
+                ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
+                {{/formParams}}
+            },
+            {{/hasFormParams}}
+    {{^hasFormParams}}
+    {{#hasBodyParam}}
+    {{#bodyParam}}
+            body: params["{{paramName}}"],
+            {{/bodyParam}}
+        {{/hasBodyParam}}
+    {{/hasFormParams}}
+        },
+        onMockResolve,
+        overloadCriteria
         );
     }
     {{/responses}}

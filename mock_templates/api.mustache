@@ -62,7 +62,7 @@ export class MockMakerspaceApi extends Mockserver {
         onMockResolve?: (resolvedMock: MockedRequest<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}undefined{{/returnType}}>) => void,
         overloadCriteria?: Partial<MatchCriteria>, 
     ): MockHandler<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}undefined{{/returnType}}> {
-        const path = `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
+        const path = this.basePath + `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
 
         return this.mockRequest{{#returnType}}{{^isResponseBinary}}<{{{returnType}}}>{{/isResponseBinary}}{{/returnType}}(
             {

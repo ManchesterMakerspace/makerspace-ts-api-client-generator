@@ -44,7 +44,13 @@ const parseQueryParams = (params: { [key: string]: any }) =>
 const constructQueryParam = (key: string, value: string): string =>
   `${key}=${encodeURIComponent(value)}`;
 
-export const makeRequest = <T>(
+const defaultError = {
+  status: 500,
+  message: defaultMessage,
+  error: "internal_server_error"
+};
+
+export const makeRequest = async <T>(
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   params?: { [key: string]: any },
@@ -57,6 +63,42 @@ export const makeRequest = <T>(
     } else {
       body = JSON.stringify(params);
     }
+  }
+
+  try {
+    const response = await window.fetch(url, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': getCookie('XSRF-TOKEN'),
+      },
+      method,
+      body
+    });
+
+    const result: ApiDataResponse<T> = {
+      response: response.clone(),
+      data: undefined
+    }
+
+    try {
+      result.data = await result.response.json()
+    } catch { }
+
+    if (result.response.status >= 200 && result.response.status < 300) {
+      return result;
+    } else {
+      return {
+        ...result,
+        error: (result.data as unknown as ApiError) || defaultError,
+      };
+    }
+  } catch (e) {
+    return {
+      response: e,
+      data: undefined,
+      error: defaultError
+    };
   }
 
   return window.fetch(url, {

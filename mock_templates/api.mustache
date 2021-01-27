@@ -62,7 +62,12 @@ export class MockMakerspaceApi extends Mockserver {
         onMockResolve?: (resolvedMock: MockedRequest<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}undefined{{/returnType}}>) => void,
         overloadCriteria?: Partial<MatchCriteria>, 
     ): MockHandler<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}undefined{{/returnType}}> {
-        const path = this.basePath + `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}};
+        const queryParams = {{#hasQueryParams}}{
+            {{#queryParams}}
+            ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
+            {{/queryParams}}
+        }{{/hasQueryParams}}{{^hasQueryParams}}{}{{/hasQueryParams}};
+        const path = this.basePath + `{{{path}}}`{{#pathParams}}.replace(`{${"{{baseName}}"}}`, `${ params["{{paramName}}"] }`){{/pathParams}} + this.paramsToString(queryParams);
 
         return this.mockRequest{{#returnType}}{{^isResponseBinary}}<{{{returnType}}}>{{/isResponseBinary}}{{/returnType}}(
             {
@@ -78,13 +83,6 @@ export class MockMakerspaceApi extends Mockserver {
             },
             times: repeat.times,
             unlimited: repeat.unlimited,
-            {{#hasQueryParams}}
-            params: {
-                {{#queryParams}}
-                ...params["{{paramName}}"] !== undefined && { "{{baseName}}": params["{{paramName}}"] }{{^-last}},{{/-last}}
-                {{/queryParams}}
-            },
-    {{/hasQueryParams}}
     {{#hasHeaderParams}}
             params: {
                 {{#headerParams}}

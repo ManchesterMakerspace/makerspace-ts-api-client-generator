@@ -82,7 +82,9 @@ export const makeRequest = async <T>(
     }
 
     try {
-      result.data = await result.response.json()
+      if (response.status !== 204) {
+        result.data = await result.response.json()
+      }
     } catch { }
 
     if (result.response.status >= 200 && result.response.status < 300) {
